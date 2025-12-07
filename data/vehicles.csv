@@ -1,0 +1,6 @@
+vehicle_id,vehicle_name,model,year,status,last_service_date,assigned_user,current_location,preferred_center,warranty_status
+101,Car A,Sedan,2022,Healthy,2025-09-21,User1,Loc1,Center C,Active
+102,Car B,SUV,2020,Fault: Brake Issue,2025-07-10,User2,Loc2,Center A,Expired
+103,Car C,Hatchback,2021,Healthy,2025-08-15,User3,Loc3,Center A,Active
+104,Car D,Sedan,2019,Fault: Oil Leak,2025-06-05,User4,Loc4,Center B,Expired
+

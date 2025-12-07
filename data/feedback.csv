@@ -1,0 +1,6 @@
+feedback_id,vehicle_name,service_date,user_rating,issue_resolved,comments,center_feedback,mechanic_notes,rca_capa_reference
+201,Car A,2025-09-21,5,Yes,"Service quick, resolved","Excellent service, timely","No issues detected, new tires fitted",RCA20250921
+202,Car B,2025-07-10,3,No,"Brake issue persists","Service center needs to recheck","Brake pads not replaced last visit",RCA20250710
+203,Car C,2025-08-15,4,Yes,"Battery replaced, works","Positive feedback","Battery terminals cleaned and battery replaced",RCA20250815
+204,Car D,2025-06-05,2,No,"Oil leak not fully fixed","Needs follow up","Gasket repair incomplete",RCA20250605
+205,Car B,2025-10-22,4,Yes,"ABS problem fixed after service","Good, issue resolved quickly","ABS sensor error fixed",RCA20251022

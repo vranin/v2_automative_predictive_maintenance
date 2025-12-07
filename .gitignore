@@ -1,0 +1,19 @@
+.env
+*.db
+*.pyc
+__pycache__/
+@"
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Streamlit
+.streamlit/
+"@ | Out-File -Encoding UTF8 .gitignore

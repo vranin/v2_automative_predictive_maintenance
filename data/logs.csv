@@ -1,0 +1,25 @@
+timestamp,vehicle_name,agent,action,event_type,status,details,output,user_confirmed,center,user_confirm,date
+2025-10-20 08:30,Car B,Data Analysis Agent,Read telemetry,diagnosis,Normal,Checked brake values,Brake pad wear detected,,Center A,,
+2025-10-20 08:31,Car B,Diagnosis Agent,Flagged brake fault,diagnosis,Normal,Severity: High,Service recommended,,Center A,,
+2025-10-20 08:32,Car B,Customer Engagement Agent,Prompted user for booking,engagement,Normal,Suggested urgent service,Booking suggested,No,Center A,,
+2025-10-20 08:35,Car D,Scheduling Agent,Appointment booked,scheduling,Normal,Slot: 2025-10-22,Slot reserved,Yes,Center B,,
+2025-10-20 08:36,Car B,Diagnosis Agent,Unauthorized API call,ueba,Blocked,Tried scheduling directly - blocked by UEBA,Action blocked,,,,
+2025-11-08 15:11,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,Yes,Center A,,2025-11-12
+2025-11-08 15:14,Car B,Diagnosis Agent,Unauthorized API call,ueba,Blocked,Attempt blocked by UEBA,,,,,
+2025-11-08 15:46,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-13 14:00 Center B,,,Center B,,2025-11-13
+2025-11-08 15:47,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-13 14:00 Center B,,,Center B,,2025-11-13
+2025-11-08 15:47,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-13 14:00 Center B,,,Center B,,2025-11-13
+2025-11-08 15:47,Car D,Diagnosis Agent,Unauthorized API call,ueba,Blocked,Attempt blocked by UEBA,,,,,
+2025-11-08 15:48,Car D,Diagnosis Agent,Unauthorized API call,ueba,Blocked,Attempt blocked by UEBA,,,,,
+2025-11-08 18:38,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
+2025-11-08 20:50,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
+2025-12-06 19:12,Car B,Diagnosis Agent,Unauthorized API call,ueba,Blocked,Attempt blocked by UEBA,,,,,
+2025-12-06 19:13,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
+2025-12-06 19:13,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
+2025-12-06 19:13,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
+2025-12-06 21:47,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
+2025-12-06 21:47,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
+2025-12-06 21:53,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
+2025-12-06 21:53,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
+2025-12-06 21:53,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
+2025-12-06 23:22,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Slot: 2025-11-13 14:00 @ Center B,,,,,

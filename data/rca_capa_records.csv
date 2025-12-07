@@ -1,0 +1,7 @@
+issue,root_cause,corrective_action,preventive_action,date,vehicle_name
+Brake pad wear,Material fatigue,Change supplier for brake materials,Implement stricter incoming QC,2025-07-12,Car B
+Oil leak at cylinder gasket,Gasket design flaw,Redesign gasket,Test new design under stress,2025-07-18,Car D
+ABS sensor failure,Poor sensor connection,Re-solder ABS connector pins,Update assembly SOP,2025-10-22,Car B
+Tire pressure warning,Valve stem defect,Replace batch of valve stems,Add random testing in production,2025-09-01,Car A
+Battery voltage drop,Loose terminal,Train assembly line on proper tightening,Add torque check in station,2025-08-30,Car C
+

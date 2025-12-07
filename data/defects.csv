@@ -1,0 +1,7 @@
+defect_id,vehicle_name,defect_type,defect_description,severity,reported_date,resolved,suggested_action,estimated_cost,estimated_duration,assigned_center
+1,Car B,Brake,Brake pad wear detected,High,2025-10-20,No,Replace brake pads,150,2 hr,Center A
+2,Car D,Engine,Oil leak at cylinder gasket,Medium,2025-09-18,No,Inspect gasket and repair,250,5 hr,Center B
+3,Car A,Tire,Tire pressure below threshold,Low,2025-10-01,Yes,Inflate tires,30,0.5 hr,Center C
+4,Car C,Battery,Battery voltage drop,Medium,2025-08-30,Yes,Check battery terminals,60,1 hr,Center A
+5,Car B,ABS,ABS warning light flashing,High,2025-10-22,No,Scan ABS error codes,200,2 hr,Center A
+

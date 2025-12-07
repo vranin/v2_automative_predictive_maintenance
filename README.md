@@ -95,3 +95,26 @@ The goal is to bring modern AI-driven predictive maintenance and conversational 
 - Enhanced conversational understanding via fine-tuned LLMs.  
 - Predictive failure forecasting dashboards.  
 - API endpoints for third-party integration (OEMs, service centers).  
+
+@"
+# Autonomous Predictive Maintenance (v2 - Team Ready)
+
+## Quick Start (works for anyone who clones)
+
+```bash
+git clone https://github.com/vranin/v2_automative_predictive_maintenance.git
+cd v2_automative_predictive_maintenance
+
+# Create virtual env
+python -m venv venv
+.\venv\Scripts\activate   # Windows
+# source venv/bin/activate  # macOS/Linux
+
+# Install exact working packages
+pip install -r requirements.txt
+
+# Copy example env and fill your keys
+copy .env.example .env
+
+# Run
+streamlit run app.py

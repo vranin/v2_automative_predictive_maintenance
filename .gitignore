@@ -1,19 +1,36 @@
-.env
-*.db
-*.pyc
-__pycache__/
 @"
-# Virtual environments
+# Python / Virtual environments
 venv/
 env/
 ENV/
+.venv/
 
 # Python cache
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
+*.egg-info/
+dist/
+build/
+
+# IDEs
+.idea/
+.vscode/
+*.code-workspace
 
 # Streamlit
 .streamlit/
+streamlit_config.toml
+
+# Environment variables (never commit real keys!)
+.env
+.env.local
+
+# Jupyter
+.ipynb_checkpoints
+
+# OS
+Thumbs.db
+.DS_Store
 "@ | Out-File -Encoding UTF8 .gitignore

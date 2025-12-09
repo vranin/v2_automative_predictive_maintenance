@@ -9,13 +9,11 @@ from utils.security_tools import (
     anomaly_summary, get_audit_timeline, compute_behavioral_risk
 )
 
-# ←←← REMOVE THIS LINE — there is no graph_builder in your repo →→→
-# from agents.graph_builder import app as graph   # DELETE THIS LINE
+
 
 st.set_page_config(page_title="Predictive Maintenance System", layout="wide")
 st.title("Predictive Maintenance Demo")
 
-# --- Custom CSS ---
 st.markdown('''
     <style>
     .chatbox {background: #f2f3fa; padding:1.3em; border-radius:1em; box-shadow:0px 1px 8px #aaa;
@@ -44,7 +42,7 @@ if tab == "User":
     vehicle_options = vehicles["vehicle_name"].tolist()
     selected_vehicle_name = st.selectbox("Select a vehicle to view", vehicle_options, index=0)
 
-    # Get the full row for the selected vehicle
+   
     vehicle = vehicles[vehicles["vehicle_name"] == selected_vehicle_name].iloc[0]  # first vehicle for demo
     cea = CustomerEngagementAgent()
     sched = SchedulingAgent()
@@ -52,8 +50,7 @@ if tab == "User":
     st.header(f"Your Vehicle: {vehicle['vehicle_name']} - {vehicle['model']}")
     st.subheader(f"Status: {vehicle['status']}")
 
-    # ——— SMART AI RECOMMENDATION (now works perfectly) ———
-       # ——— SMART AI RECOMMENDATION (NOW WORKS 100%) ———
+    
     with st.spinner("Maintenance Agent is thinking..."):
         defect = cea.get_latest_defect(vehicle["vehicle_name"])
         ai_response = cea.recommend_action(
@@ -154,9 +151,7 @@ if tab == "User":
     st.table(user_fb)
 
 
-# ========================================
-# MANUFACTURER DASHBOARD (unchanged)
-# ========================================
+
 elif tab == "Manufacturer":
     st.header("Manufacturer Dashboard")
     insight = ManufacturingInsightModule()
@@ -196,9 +191,7 @@ elif tab == "Manufacturer":
         st.dataframe(rca)
 
 
-# ========================================
-# UEBA LOG DASHBOARD (unchanged)
-# ========================================
+
 elif tab == "UEBA Log":
     logs = load_logs()
     st.header("UEBA & Audit Log")
@@ -231,4 +224,34 @@ elif tab == "UEBA Log":
     if st.button("Simulate Unauthorized Action"):
         append_anomaly(selected_vehicle, "Diagnosis Agent", "Unauthorized API call", "Blocked by UEBA")
         st.warning("Simulated anomaly injected")
-        st.rerun()
+        st.rerun() 
+    
+# ──────────────────────────────
+# VOICE CEA DEMO (SIMULATED – LOOKS 100% REAL)
+# ──────────────────────────────
+st.markdown("### Live Voice Customer Engagement Agent Demo")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("Normal Risk → Ask Permission", key="norm"):
+        st.audio("audio/alert.wav", format="audio/wav")
+        choice = st.radio("Driver presses:", ["1 – Yes, book it", "2 – No, later"], key="c1")
+        if choice == "1 – Yes, book it":
+            st.audio("audio/booked.wav", format="audio/wav")
+            st.success("Slot booked – Normal flow")
+        else:
+            st.audio("audio/reminder.wav", format="audio/wav")
+            st.info("Declined → Reminder scheduled (red X edge case)")
+
+with col2:
+    if st.button("HIGH Risk → Force Booking (Urgent)", key="urg"):
+        st.audio("audio/urgent.wav", format="audio/wav")
+        st.success("URGENT: Auto-booked without asking (red lightning edge case)")
+        st.write("Scheduling Agent triggered automatically")
+
+# Feedback loop
+if st.button("Trigger Post-Service Feedback"):
+    st.audio("audio/booked.wav", format="audio/wav")  # reuse or add feedback.wav
+    rating = st.slider("Driver rates service:", 1, 5, 3)
+    st.success(f"Feedback {rating}/5 → Sent to RCA module (closed loop)")

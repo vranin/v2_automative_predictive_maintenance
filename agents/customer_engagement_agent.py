@@ -91,3 +91,22 @@ Example tone: friendly but proactive.
     # NEW: simple wrapper so your app.py doesn't change
     def recommend_action(self, vehicle_name: str, customer_name: str = "Valued Customer") -> str:
         return self.get_recommendation(vehicle_name, customer_name)
+
+from langchain.tools import tool
+from utils.voice_caller import phone
+
+@tool
+def trigger_live_voice_alert(vehicle_id: str, risk_level: str = "medium") -> str:
+    """Triggers real outbound voice call using free SIP (covers all your slide edge cases)"""
+    if phone is None:
+        return "Voice system not ready"
+    
+    try:
+        call = phone.call(
+            to="+919920475211",  # ← change to your real number
+            from_="sip:justhere12@sip.linphone.org",
+            metadata={"vehicle_id": vehicle_id, "risk": risk_level}
+        )
+        return f"Calling {vehicle_id} (risk: {risk_level}) → live voice alert sent!"
+    except Exception as e:
+        return f"Call failed: {str(e)}"

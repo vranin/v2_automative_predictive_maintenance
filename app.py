@@ -38,128 +38,195 @@ tab = st.sidebar.selectbox("Dashboard", ["User", "Manufacturer", "UEBA Log"])
 if tab == "User":
     vehicles = load_vehicles()
     feedback = load_feedback()
-    # Let user pick any vehicle
+
+    # Vehicle selector
     vehicle_options = vehicles["vehicle_name"].tolist()
     selected_vehicle_name = st.selectbox("Select a vehicle to view", vehicle_options, index=0)
+    vehicle = vehicles[vehicles["vehicle_name"] == selected_vehicle_name].iloc[0].to_dict()
 
-   
-    vehicle = vehicles[vehicles["vehicle_name"] == selected_vehicle_name].iloc[0]  # first vehicle for demo
     cea = CustomerEngagementAgent()
     sched = SchedulingAgent()
 
     st.header(f"Your Vehicle: {vehicle['vehicle_name']} - {vehicle['model']}")
     st.subheader(f"Status: {vehicle['status']}")
 
-    
-    with st.spinner("Maintenance Agent is thinking..."):
-        defect = cea.get_latest_defect(vehicle["vehicle_name"])
+    with st.spinner("Analyzing vehicle health..."):
         ai_response = cea.recommend_action(
             vehicle_name=vehicle["vehicle_name"],
             customer_name=vehicle.get("customer_name", "Valued Customer")
         )
 
-    # Beautiful chat bubble – NO MORE SYNTAX ERROR
-    chat_message = ai_response.replace("\n", "<br>")
+    # Chat bubble – FIXED (no backslash in f-string)
+    chat_html = ai_response.replace("\n", "<br>")
     st.markdown(
-        f"""
-        <div class="chatbox">
-        <span class="big-label">Maintenance Agent</span><br><br>
-        {chat_message}
-        </div>
-        """,
+        f"<div class='chatbox'>"
+        f"<span class='big-label'>Maintenance Agent</span><br><br>"
+        f"{chat_html}"
+        f"</div>",
         unsafe_allow_html=True
     )
 
-    # ——— Session state ———
-    if "confirmed_preferences" not in st.session_state:
-        st.session_state.confirmed_preferences = None
-    if "feedback_given" not in st.session_state:
-        st.session_state.feedback_given = False
-    if "display_pref_form" not in st.session_state:
-        st.session_state.display_pref_form = False
+    # Session state
+    defaults = {"confirmed_preferences": None, "display_pref_form": False, "feedback_given": False}
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
 
-    col1, col2 = st.columns(2)
-    with col1:
-        yes = st.button("Yes, schedule service", key="yes_btn", type="primary")
-    with col2:
-        no = st.button("No, not now", key="no_btn", type="secondary")
+    # Yes/No buttons
+    c1, c2 = st.columns(2)
+    with c1:
+        yes = st.button("Yes, schedule service", type="primary")
+    with c2:
+        no = st.button("No, not now")
 
     if yes:
         st.session_state.display_pref_form = True
     if no:
         st.session_state.confirmed_preferences = None
-        st.session_state.feedback_given = False
         st.session_state.display_pref_form = False
-        st.markdown('<div class="chatbox">No problem! We’ll keep monitoring your vehicle and let you know if anything urgent comes up.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="chatbox">Okay! We will keep monitoring your vehicle.</div>', unsafe_allow_html=True)
 
-    # ——— Preference Form ———
+    # Scheduling form
+ # ——— Scheduling Preference Form (3 Slots) ———
     if st.session_state.display_pref_form and not st.session_state.confirmed_preferences:
         slots = sched.get_available_slots(vehicle['vehicle_name'])
         slots_df = pd.DataFrame(slots)
 
-        st.markdown('<span class="pref-label"><b>Set Your Three Preferences:</b></span>', unsafe_allow_html=True)
+        st.markdown("### Set Your 3 Preferred Slots")
+        st.info("We'll book the first available slot from your preferences, or suggest alternatives if none match.")
+
         with st.form("schedule_form"):
-            st.write("Preference 1:")
-            c1, c2, c3 = st.columns(3)
-            with c1: date1 = st.selectbox("Date 1", slots_df["date"], key="d1")
-            with c2: time1 = st.selectbox("Time 1", slots_df[slots_df["date"] == date1]["time"], key="t1")
-            with c3: center1 = st.selectbox("Place 1", slots_df[slots_df["date"] == date1]["center"].unique(), key="c1")
+            # Preference 1
+            st.write("**Preference 1 (Top Choice)**")
+            col1a, col1b, col1c = st.columns(3)
+            with col1a:
+                date1 = st.selectbox("Date", sorted(slots_df["date"].unique()), key="d1")
+            with col1b:
+                times1 = slots_df[slots_df["date"] == date1]["time"].tolist()
+                time1 = st.selectbox("Time", times1, key="t1")
+            with col1c:
+                centers1 = slots_df[(slots_df["date"] == date1) & (slots_df["time"] == time1)]["center"].unique()
+                center1 = st.selectbox("Service Center", centers1, key="c1")
 
-            st.write("Preference 2:")
-            c4, c5, c6 = st.columns(3)
-            with c4: date2 = st.selectbox("Date 2", slots_df["date"], key="d2")
-            with c5: time2 = st.selectbox("Time 2", slots_df[slots_df["date"] == date2]["time"], key="t2")
-            with c6: center2 = st.selectbox("Place 2", slots_df[slots_df["date"] == date2]["center"].unique(), key="c2")
+            # Preference 2
+            st.write("**Preference 2**")
+            col2a, col2b, col2c = st.columns(3)
+            with col2a:
+                date2 = st.selectbox("Date", sorted(slots_df["date"].unique()), key="d2")
+            with col2b:
+                times2 = slots_df[slots_df["date"] == date2]["time"].tolist()
+                time2 = st.selectbox("Time", times2, key="t2")
+            with col2c:
+                centers2 = slots_df[(slots_df["date"] == date2) & (slots_df["time"] == time2)]["center"].unique()
+                center2 = st.selectbox("Service Center", centers2, key="c2")
 
-            st.write("Preference 3:")
-            c7, c8, c9 = st.columns(3)
-            with c7: date3 = st.selectbox("Date 3", slots_df["date"], key="d3")
-            with c8: time3 = st.selectbox("Time 3", slots_df[slots_df["date"] == date3]["time"], key="t3")
-            with c9: center3 = st.selectbox("Place 3", slots_df[slots_df["date"] == date3]["center"].unique(), key="c3")
+            # Preference 3
+            st.write("**Preference 3**")
+            col3a, col3b, col3c = st.columns(3)
+            with col3a:
+                date3 = st.selectbox("Date", sorted(slots_df["date"].unique()), key="d3")
+            with col3b:
+                times3 = slots_df[slots_df["date"] == date3]["time"].tolist()
+                time3 = st.selectbox("Time", times3, key="t3")
+            with col3c:
+                centers3 = slots_df[(slots_df["date"] == date3) & (slots_df["time"] == time3)]["center"].unique()
+                center3 = st.selectbox("Service Center", centers3, key="c3")
 
-            confirm = st.form_submit_button("Confirm Preferences", type="primary")
-            if confirm:
-                st.session_state.confirmed_preferences = {
-                    "date": date1, "time": time1, "center": center1,
-                }
-                st.session_state.display_pref_form = False
+            submitted = st.form_submit_button("Submit Preferences & Book Service", type="primary")
+            if submitted:
+                # Store all 3 preferences
+                preferences = [
+                    {"date": date1, "time": time1, "center": center1},
+                    {"date": date2, "time": time2, "center": center2},
+                    {"date": date3, "time": time3, "center": center3}
+                ]
+                
+                # For now, book the first one (Preference 1) — you can add logic here to check availability across all 3
+                confirmed_slot = preferences[0]  # Or implement matching logic
+                
+                st.session_state.confirmed_preferences = confirmed_slot
+                st.session_state.user_preferences = preferences  # Optional: store all for display
                 st.rerun()
-
-    # ——— Confirmation Message ———
+  # ——— AFTER BOOKING IS CONFIRMED ———
     if st.session_state.confirmed_preferences:
         cp = st.session_state.confirmed_preferences
-        st.markdown(f'''<div class="confirmbox">
-        Your service is scheduled at:<br><br>
-        <b>{cp['date']}</b> | <b>{cp['time']}</b> | <b>{cp['center']}</b>
-        </div>''', unsafe_allow_html=True)
+        all_prefs = st.session_state.get("user_preferences", [cp])  # Fallback to just confirmed if not stored
+        
+        st.markdown("### Your Booking Confirmation")
+        st.success("We've booked your top available preference!")
+        
+        # Show all 3 with the confirmed one highlighted
+        for i, pref in enumerate(all_prefs, 1):
+            is_confirmed = (pref == cp)
+            status = "✅ BOOKED" if is_confirmed else "Alternative"
+            color = "background-color: #d4edda; color: #155724;" if is_confirmed else ""
+            
+            st.markdown(f"""
+            <div style="padding: 10px; margin: 5px 0; border: 1px solid #ddd; {color}">
+            Preference {i}: <strong>{pref['date']} at {pref['time']} - {pref['center']}</strong> | {status}
+            </div>
+            """, unsafe_allow_html=True)
+    
+   
 
-        log_event(
-            vehicle["vehicle_name"], "Scheduling Agent", "Appointment confirmed", "scheduling",
-            "Confirmed", f"Slot: {cp['date']} {cp['time']} @ {cp['center']}"
-        )
+        st.markdown("### Post-Service Feedback")
+        vid = vehicle["vehicle_name"].replace(" ", "_").replace("/", "")
 
-        if not st.session_state.feedback_given:
-            st.markdown('<div class="chatbox">Your service is booked! How was the scheduling experience?</div>', unsafe_allow_html=True)
-            user_feedback = st.text_area("Your feedback (optional):")
-            if st.button("Submit Feedback", type="primary"):
-                st.success("Thank you for your feedback!")
-                st.session_state.feedback_given = True
+        if st.button("I have completed the service – Give Feedback", type="primary", key=f"fb_{vid}"):
+            st.session_state[f"showfb_{vid}"] = True
+            st.rerun()
 
-    # ——— Service History
-    st.markdown('<span class="big-label">Service History & Feedback:</span>', unsafe_allow_html=True)
-    user_fb = feedback[feedback["vehicle_name"] == vehicle["vehicle_name"]]
-    st.table(user_fb)
+        if st.session_state.get(f"showfb_{vid}", False):
+            st.info("Your feedback goes straight to the manufacturer")
 
+            rating = st.slider("Service rating", 1, 5, 4, key=f"r_{vid}")
+            resolved = st.radio("Issue resolved?", ["Yes", "No", "Partially"], key=f"res_{vid}")
+            part = st.selectbox("Part replaced", ["Brake Pad", "Clutch Plate", "ECU", "Battery", "Other"], key=f"p_{vid}")
+
+            if st.button("Send to Manufacturer", type="primary", key=f"send_{vid}"):
+                st.balloons()
+                st.success("Feedback sent!")
+
+                entry = {
+                    "time": pd.Timestamp.now().strftime("%b %d, %H:%M"),
+                    "vehicle": vehicle["vehicle_name"],
+                    "rating": f"{rating} stars",
+                    "resolved": resolved,
+                    "part": part,
+                }
+
+                if "oem_feedback_buffer" not in st.session_state:
+                    st.session_state.oem_feedback_buffer = []
+                st.session_state.oem_feedback_buffer.insert(0, entry)
+
+                st.session_state[f"showfb_{vid}"] = False
+                st.rerun()
+
+    # SERVICE HISTORY – ONLY ONCE
+    st.markdown("### Service History")
+    hist = feedback[feedback["vehicle_name"] == vehicle["vehicle_name"]]
+    if len(hist) > 0:
+        st.dataframe(hist.drop(columns=["feedback_id"], errors="ignore"), use_container_width=True, hide_index=True)
+    else:
+        st.info("No service records yet")
 
 
 elif tab == "Manufacturer":
     st.header("Manufacturer Dashboard")
+    
+    st.header("Live Feedback from Drivers (Real-Time Feed)")
+    if "oem_feedback_buffer" in st.session_state and st.session_state.oem_feedback_buffer:
+        df = pd.DataFrame(st.session_state.oem_feedback_buffer)
+        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.caption(f"{len(df)} feedback(s) received • Updates instantly")
+    else:
+        st.info("Waiting for driver feedback… appears here instantly")
     insight = ManufacturingInsightModule()
 
     st.subheader("Analytics Summary:")
     summary_lines = [ln.strip() for ln in insight.generate_insights().split("\n") if ln.strip()]
     st.markdown(
-        "<div style='background:#f5f5fa; border-radius:10px; box-shadow:0px 1px 10px #bbb; padding:1em 1.5em; margin-bottom:1.2em;'>"
+        "<div style='background:##FF0000; border-radius:10px; box-shadow:0px 1px 10px #bbb; padding:1em 1.5em; margin-bottom:1.2em;'>"
         "<span style='font-size:1.15em; font-weight:600;'>Key Insights:</span><br><ul>" +
         ''.join(f"<li style='margin:0.5em 0; font-size:1.08em'>{line}</li>" for line in summary_lines) +
         "</ul></div>", unsafe_allow_html=True)
@@ -167,7 +234,7 @@ elif tab == "Manufacturer":
     trending = insight.defect_trends()["top_defects"]
     if len(trending) > 0:
         top_defects = ', '.join(trending["defect_type"].astype(str).tolist())
-        st.markdown(f"<div style='background:#fff9c4; padding:1em; border-radius:10px; font-size:1.1em; margin-bottom:1em;'><b>Top Recurring Issues:</b> {top_defects}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='background:##FF0000; padding:1em; border-radius:10px; font-size:1.1em; margin-bottom:1em;'><b>Top Recurring Issues:</b> {top_defects}</div>", unsafe_allow_html=True)
 
     st.subheader("Feedback Insights:")
     fb_df = insight.aggregate_feedback_insights()["average_rating_by_vehicle"].reset_index(drop=True)

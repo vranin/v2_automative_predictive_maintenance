@@ -23,3 +23,6 @@ timestamp,vehicle_name,agent,action,event_type,status,details,output,user_confir
 2025-12-06 21:53,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
 2025-12-06 21:53,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Confirmed slot preference: 2025-11-12 10:00 Center A,,,Center A,,2025-11-12
 2025-12-06 23:22,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Slot: 2025-11-13 14:00 @ Center B,,,,,
+2025-12-09 14:29,Car A,Scheduling Agent,Appointment confirmed,scheduling,Confirmed,Slot: 2025-11-12 10:00 @ Center A,,,,,
+2025-12-09 14:45,Car B,Diagnosis Agent,Unauthorized API call,ueba,Blocked,Blocked by UEBA,,,,,
+2025-12-09 14:45,Car B,Diagnosis Agent,Unauthorized API call,ueba,Blocked,Blocked by UEBA,,,,,

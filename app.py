@@ -209,6 +209,55 @@ if tab == "User":
         st.dataframe(hist.drop(columns=["feedback_id"], errors="ignore"), use_container_width=True, hide_index=True)
     else:
         st.info("No service records yet")
+    
+        # ————————— LIVE MAP OF NEAREST SERVICE CENTERS —————————
+    st.markdown("### Nearest Service Centers")
+
+    # Simulated real locations (replace with your actual centers if you want)
+    service_centers = [
+        {"name": "Downtown Service Hub",    "lat": 28.6139, "lon": 77.2090, "wait": "15 min"},
+        {"name": "North Delhi Center",   "lat": 28.7041, "lon": 77.1025, "wait": "22 min"},
+        {"name": "Gurgaon Premium",         "lat": 28.4595, "lon": 77.0266, "wait": "18 min"},
+        {"name": "Noida Sector-62",         "lat": 28.6129, "lon": 77.3619, "wait": "30 min"},
+        {"name": "Faridabad Workshop",      "lat": 28.4089, "lon": 77.3178, "wait": "35 min"},
+    ]
+
+    # Simulated driver location (changes slightly per vehicle for realism)
+    import numpy as np
+    driver_lat = 28.5355 + np.random.normal(0, 0.03)   # Delhi NCR area
+    driver_lon = 77.3910 + np.random.normal(0, 0.03)
+
+    # Create dataframe for map
+    import pandas as pd
+    df_centers = pd.DataFrame(service_centers)
+    df_driver = pd.DataFrame([{
+        "name": f"{vehicle['vehicle_name']} (You are here)",
+        "lat": driver_lat,
+        "lon": driver_lon,
+        "wait": "—"
+    }])
+
+    # Combine and color differently
+    df_map = pd.concat([df_driver, df_centers], ignore_index=True)
+    df_map["color"] = ["#00ff9d"] + ["#ff465a"] * len(df_centers)  # Green = driver, Red = centers
+    df_map["size"]  = [80] + [50] * len(df_centers)
+
+    # Display the beautiful map
+    st.map(df_map, latitude="lat", longitude="lon", color="color", size="size", zoom=10)
+
+    # Show list below map with travel time
+    st.markdown("Available slots today:")
+    cols = st.columns(len(service_centers))
+    for col, center in zip(cols, service_centers):
+        with col:
+            st.markdown(f"""
+            **{center['name']}**  
+            Wait time: **{center['wait']}**  
+            """)
+            if st.button("Navigate", key=f"nav_{center['name']}"):
+                st.success(f"Opening Google Maps to {center['name']}...")
+                st.markdown(f"[Click here if not redirected](https://maps.google.com/?q={center['lat']},{center['lon']})")
+    
 
 
 elif tab == "Manufacturer":
@@ -346,81 +395,7 @@ elif tab == "Manufacturer":
         st.dataframe(top10[["vehicle_id", "risk_score", "issue"]], use_container_width=True)
         st.info("Remaining vehicles moved to tomorrow's queue (bay capacity respected)")
 
-    # ==================== FEATURE #3: OEM RCA REPORT (ONE-CLICK PDF) ====================
-    st.divider()
-    st.markdown("## OEM View – Recurring Defect Detection & CAPA")
-
-    # Fake post-service feedback data 
-    feedback_data = pd.DataFrame({
-        "vehicle_id": [f"V{i:04d}" for i in range(1,51)],
-        "part_failed": np.random.choice(["Clutch Plate", "Brake Pad", "ECU", "Battery", "Suspension"], 50),
-        "batch_no": np.random.choice(["A127", "B884", "C221", "D009"], 50),
-        "supplier": np.random.choice(["XYZ Auto", "ABC Industries", "National Parts"], 50),
-        "days_since_service": np.random.randint(1, 90, 50),
-        "rating": np.random.choice([1,2,3,4,5], 50, p=[0.1,0.15,0.15,0.3,0.3])
-    })
-
-    # Find the worst offender
-    worst = feedback_data.groupby(["part_failed", "batch_no", "supplier"]).size().reset_index(name="failures")
-    worst = worst.sort_values("failures", ascending=False).iloc[0]
-
-    col1, col2 = st.columns([1,2])
-    with col1:
-        st.metric("Worst Recurring Defect", f"{worst.part_failed}")
-        st.metric("Batch", f"{worst.batch_no}")
-        st.metric("Supplier", worst.supplier)
-        st.metric("Failure Count", worst.failures)
-        st.metric("Failure Rate", f"{(worst.failures/len(feedback_data)*100):.1f}%")
-
-    with col2:
-        st.bar_chart(feedback_data["part_failed"].value_counts().head(5))
-
-    # ONE-CLICK PDF REPORT
-    if st.button("Generate OEM CAPA Report (Download PDF)", type="primary", use_container_width=True):
-        from fpdf import FPDF
-        import base64
-        from datetime import datetime
-
-        class PDF(FPDF):
-            def header(self):
-                self.set_font('Arial', 'B', 16)
-                self.cell(0, 10, 'OEM Quality Alert – Root Cause Report', align='C', ln=1)
-                self.ln(5)
-            def footer(self):
-                self.set_y(-15)
-                self.set_font('Arial', 'I', 8)
-                self.cell(0, 10, f'Page {self.page_no()} | Generated: {datetime.now().strftime("%d %b %Y")}', align='C')
-
-        pdf = PDF()
-        pdf.add_page()
-        pdf.set_font('Arial', '', 12)
-        pdf.cell(0, 10, f"Critical Finding:", ln=1)
-        pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(220, 50, 50)
-        pdf.cell(0, 10, f"{worst.part_failed} – Batch {worst.batch_no} from {worst.supplier}", ln=1)
-        pdf.set_text_color(0,0,0)
-        pdf.set_font('Arial', '', 12)
-        pdf.cell(0, 10, f"has caused {worst.failures} failures ({(worst.failures/len(feedback_data)*100):.1f}%) in last 90 days.", ln=1)
-        pdf.ln(5)
-        pdf.cell(0, 10, "Recommended CAPA:", ln=1)
-        pdf.cell(0, 10, "• Immediately halt use of Batch A127", ln=1)
-        pdf.cell(0, 10, "• Switch to alternate supplier ABC Industries (0 failures in dataset)", ln=1)
-        pdf.cell(0, 10, "• Initiate 8D analysis within 48 hours", ln=1)
-
-        pdf_file = "OEM_RCA_Report.pdf"
-        pdf.output(pdf_file)
-
-        with open(pdf_file, "rb") as f:
-            st.download_button(
-                "Download CAPA Report PDF",
-                data=f,
-                file_name=f"RCA_Report_{datetime.now().strftime('%Y%m%d')}.pdf",
-                mime="application/pdf"
-            )
-        st.success("OEM report generated & ready for download!")
-
-        st.divider()
-    st.divider()
+    
     st.markdown("## Live CAPA Impact Simulator")
 
     current_failures = 487
@@ -452,6 +427,125 @@ elif tab == "Manufacturer":
     if st.button("EXECUTE CAPA PLAN NOW", type="primary", use_container_width=True):
         
         st.success(f"CAPA executed! {current_failures - projected_failures} failures prevented | ₹{savings_cr:,} Cr saved")
+    
+        st.divider()
+    st.markdown("## OEM View – Recurring Defect Detection & CAPA")
+
+    # Fake post-service feedback data
+    feedback_data = pd.DataFrame({
+        "vehicle_id": [f"V{i:04d}" for i in range(1, 51)],
+        "part_failed": np.random.choice(["Clutch Plate", "Brake Pad", "ECU", "Battery", "Suspension"], 50),
+        "batch_no": np.random.choice(["A127", "B884", "C221", "D009"], 50),
+        "supplier": np.random.choice(["XYZ Auto", "ABC Industries", "National Parts"], 50),
+        "days_since_service": np.random.randint(1, 90, 50),
+        "rating": np.random.choice([1, 2, 3, 4, 5], 50, p=[0.1, 0.15, 0.15, 0.3, 0.3])
+    })
+
+    # Find worst recurring defect
+    worst = feedback_data.groupby(["part_failed", "batch_no", "supplier"]).size().reset_index(name="failures")
+    worst = worst.sort_values("failures", ascending=False).iloc[0]
+
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        st.metric("Worst Recurring Defect", worst["part_failed"])
+        st.metric("Batch", worst["batch_no"])
+        st.metric("Supplier", worst["supplier"])
+        st.metric("Failure Count", worst["failures"])
+        st.metric("Failure Rate", f"{(worst.failures/len(feedback_data)*100):.1f}%")
+
+    with col2:
+        st.bar_chart(feedback_data["part_failed"].value_counts().head(5))
+    from fpdf import FPDF
+    from datetime import datetime
+
+    class PDFReport(FPDF):
+        def header(self):
+            self.set_font('helvetica', 'B', 18)          # safe built-in font
+            self.set_text_color(200, 0, 0)
+            self.cell(0, 15, 'OEM Quality Alert - Root Cause Report', align='C', ln=1)
+            self.ln(8)
+
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('helvetica', 'I', 9)
+            self.set_text_color(128, 128, 128)
+            self.cell(0, 10, f'Page {self.page_no()} - {datetime.now().strftime("%d %b %Y")}', align='C')
+
+    # Generate PDF — using only safe characters
+    pdf = PDFReport()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    pdf.set_font('helvetica', '', 13)
+    pdf.cell(0, 10, "Critical Finding:", ln=1)
+
+    pdf.set_font('helvetica', 'B', 16)
+    pdf.set_text_color(220, 50, 50)
+    pdf.cell(0, 12, f"{worst.part_failed} - Batch {worst.batch_no} from {worst.supplier}", ln=1)
+
+    pdf.set_text_color(0, 0, 0)
+
+    pdf.set_font('helvetica', '', 13)
+    pdf.multi_cell(0, 10,
+        f"has caused {worst.failures} failures "
+        f"({worst.failures/len(feedback_data)*100:.1f}%) in the last 90 days.\n\n"
+        "Recommended Corrective & Preventive Actions (CAPA):\n"
+        f"- Immediately halt use of Batch {worst.batch_no}\n"
+        "- Switch to alternate supplier ABC Industries (0 failures recorded)\n"
+        "- Initiate 8D root cause analysis within 48 hours\n"
+        "- Notify all affected vehicles for recall inspection"
+    )
+
+    pdf_file = "OEM_RCA_Report.pdf"
+    pdf.output(pdf_file)
+
+    with open(pdf_file, "rb") as f:
+        st.download_button(
+            label="Download CAPA Report PDF",
+            data=f,
+            file_name=f"RCA_Report_{datetime.now().strftime('%Y%m%d')}.pdf",
+            mime="application/pdf",
+            type="primary",
+            use_container_width=True
+        )
+
+    st.success("CAPA report generated successfully!")
+
+
+elif tab == "UEBA Log":
+    logs = load_logs()
+    st.header("UEBA & Security Audit Log")
+
+    st.subheader("Audit Timeline (Latest First)")
+    audit = get_audit_timeline(logs).reset_index(drop=True)
+    audit.index = range(1, len(audit) + 1)
+    audit.index.name = "No."
+    st.dataframe(audit, use_container_width=True)
+
+    st.subheader("Filter by Vehicle")
+    selected_vehicle = st.selectbox("Select Vehicle", options=sorted(logs["vehicle_name"].unique()), key="ueba_vehicle")
+    st.dataframe(filter_logs(logs, vehicle_name=selected_vehicle), use_container_width=True)
+
+    st.subheader("Security Alerts & Anomalies")
+    anomalies = get_anomalies(logs)
+    def highlight_anomaly(row):
+        return ['background-color: #ffcccc; font-weight: bold'] * len(row) if any(x in str(row['status']) for x in ['Blocked', 'ALERT', 'UNAUTHORIZED']) else [''] * len(row)
+    st.dataframe(anomalies.style.apply(highlight_anomaly, axis=1), use_container_width=True)
+
+    st.subheader("Anomaly Statistics")
+    st.write(anomaly_summary(logs))
+
+    st.subheader("Behavioral Risk Score (Last 7 Days)")
+    risk_df = compute_behavioral_risk(logs)
+    risk_df = risk_df.reset_index(drop=True)
+    risk_df.index = range(1, len(risk_df) + 1)
+    risk_df.index.name = "Rank"
+    st.dataframe(risk_df, use_container_width=True)
+
+    if st.button("Simulate Unauthorized Access Attempt", type="secondary"):
+        append_anomaly(selected_vehicle, "Diagnosis Agent", "Unauthorized API call detected", "BLOCKED by UEBA")
+        st.warning("Simulated security incident injected!")
+        st.rerun()
 
 
 

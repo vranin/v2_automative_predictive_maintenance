@@ -255,3 +255,63 @@ if st.button("Trigger Post-Service Feedback"):
     st.audio("audio/booked.wav", format="audio/wav")  # reuse or add feedback.wav
     rating = st.slider("Driver rates service:", 1, 5, 3)
     st.success(f"Feedback {rating}/5 → Sent to RCA module (closed loop)")
+
+# ==================== FEATURE #2: FLEET HEATMAP + PRIORITIZATION ====================
+st.divider()
+st.markdown("## Fleet Manager View – Risk-Based Scheduling (10 bays limit)")
+
+import streamlit as st
+import pandas as pd
+import numpy as np
+import folium
+from streamlit_folium import st_folium
+import time
+
+# Fake 20 vehicles (replace later with real DB)
+np.random.seed(42)
+fleet = pd.DataFrame({
+    "vehicle_id": [f"TRK-{i:03d}" for i in range(1,21)],
+    "risk_score": np.random.uniform(0.1, 0.95, 20).round(2),
+    "lat": np.random.uniform(18.9, 19.1, 20),
+    "lon": np.random.uniform(72.8, 73.0, 20),
+    "issue": np.random.choice(["Brake", "Engine", "Tyre", "Battery"], 20)
+})
+fleet["risk_level"] = pd.cut(fleet["risk_score"], bins=[0,0.4,0.7,1], labels=["Low", "Medium", "High"])
+color_map = {"Low": "green", "Medium": "orange", "High": "red"}
+
+# Map
+m = folium.Map(location=[19.0, 72.9], zoom_start=11)
+for _, row in fleet.iterrows():
+    folium.CircleMarker(
+        location=[row.lat, row.lon],
+        radius=12,
+        popup=f"{row.vehicle_id}<br>{row.issue}<br>Risk: {row.risk_score}",
+        color="black",
+        weight=1,
+        fillColor=color_map[row.risk_level],
+        fillOpacity=0.8
+    ).add_to(m)
+
+col_map, col_table = st.columns([2,1])
+with col_map:
+    st.markdown("##### Live Risk Heatmap (20 vehicles)")
+    st_folium(m, width=700, height=500)
+with col_table:
+    st.markdown("##### Risk Ranking")
+    st.dataframe(
+        fleet[["vehicle_id", "risk_score", "risk_level", "issue"]]
+        .sort_values("risk_score", ascending=False)
+        .reset_index(drop=True),
+        use_container_width=True
+    )
+
+# ONE-CLICK FLEET SCHEDULING BUTTON
+if st.button("SCHEDULE TODAY'S 10 SLOTS (Highest Risk First)", type="primary", use_container_width=True):
+    with st.spinner("Prioritizing fleet..."):
+        time.sleep(2)
+    
+    top10 = fleet.sort_values("risk_score", ascending=False).head(10)
+    
+    st.success("10 bays filled with highest-risk vehicles:")
+    st.dataframe(top10[["vehicle_id", "risk_score", "issue"]], use_container_width=True)
+    st.info("Remaining vehicles moved to tomorrow's queue (bay capacity respected)")

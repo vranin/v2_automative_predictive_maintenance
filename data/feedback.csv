@@ -1,6 +1,9 @@
-feedback_id,vehicle_name,service_date,user_rating,issue_resolved,comments,center_feedback,mechanic_notes,rca_capa_reference
-201,Car A,2025-09-21,5,Yes,"Service quick, resolved","Excellent service, timely","No issues detected, new tires fitted",RCA20250921
-202,Car B,2025-07-10,3,No,"Brake issue persists","Service center needs to recheck","Brake pads not replaced last visit",RCA20250710
-203,Car C,2025-08-15,4,Yes,"Battery replaced, works","Positive feedback","Battery terminals cleaned and battery replaced",RCA20250815
-204,Car D,2025-06-05,2,No,"Oil leak not fully fixed","Needs follow up","Gasket repair incomplete",RCA20250605
-205,Car B,2025-10-22,4,Yes,"ABS problem fixed after service","Good, issue resolved quickly","ABS sensor error fixed",RCA20251022
+feedback_id,vehicle_name,service_date,user_rating,issue_resolved,comments,center_feedback,mechanic_notes,rca_capa_reference,sentiment
+201,Car A,2025-09-21 00:00:00,5.0,Yes,"Service quick, resolved","Excellent service, timely","No issues detected, new tires fitted",RCA20250921,0.3333333333333333
+202,Car B,2025-07-10 00:00:00,3.0,No,Brake issue persists,Service center needs to recheck,Brake pads not replaced last visit,RCA20250710,0.0
+203,Car C,2025-08-15 00:00:00,4.0,Yes,"Battery replaced, works",Positive feedback,Battery terminals cleaned and battery replaced,RCA20250815,0.0
+204,Car D,2025-06-05 00:00:00,2.0,No,Oil leak not fully fixed,Needs follow up,Gasket repair incomplete,RCA20250605,0.1
+205,Car B,2025-10-22 00:00:00,4.0,Yes,ABS problem fixed after service,"Good, issue resolved quickly",ABS sensor error fixed,RCA20251022,0.1
+FB20285006,Car A,,4.5,Yes,Great service!,Customer satisfied: 4.5/5 - unknown risk monitored,Customer feedback noted; review vehicle history and recent repairs.,RCA20251216,1.0
+FB20285007,Car B,,4.5,Yes,Great service!,Customer satisfied: 4.5/5 - low risk monitored,Customer feedback noted; review vehicle history and recent repairs.,RCA20251216,1.0
+FB20285008,Car A,2025-12-16,4.0,Yes,Service completed; report stored at data\service_reports\2025\12\AI Colegion SOP.pdf,Customer satisfied: 4.0/5 - low risk monitored,Customer feedback noted; review vehicle history and recent repairs.,RCA20251216,

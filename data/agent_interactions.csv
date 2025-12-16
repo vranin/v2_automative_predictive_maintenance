@@ -1,0 +1,1 @@
+timestamp,source_agent,target_agent,vehicle_name,action_type,data_size,response_time_ms,anomaly_score,cross_agent_calls,data_consistency,blocked
